@@ -24,24 +24,20 @@ local function import(path)
     end
 end
 
-local    metaexport = {}
-function metaexport.__call(t, env)
+local function export(t, env)
     env = env or _G
     for k, v in pairs(t) do
-        assert(not rawget(env, k) , k .. ' is already defined')
-        assert(type(k) == 'string', 'only strings are allowed')
-        rawset(env, k, v)
+        local defined = rawget(env, k)
+        if defined ~= v then
+            assert(not defined, k .. ' is already defined')
+            assert(type(k) == 'string', 'only strings are allowed')
+            rawset(env, k, v)
+        end
     end
-end
-
-local function make_exportable(exports)
-    assert(not getmetatable(exports), 'cant make this exportable')
-    setmetatable(exports, metaexport)
-    return exports
 end
 
 return {
     add_package_path = add_package_path,
     import           = import,
-    make_exportable  = make_exportable
+    export           = export
 }
